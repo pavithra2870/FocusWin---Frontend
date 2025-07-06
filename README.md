@@ -51,26 +51,50 @@ Authentication: Session-based authentication with express-session and connect-mo
 To get a local copy up and running, follow these simple steps.
 
 # Prerequisites
-- Node.js and npm installed.
-- A local or remote MongoDB instance.
+Node.js and npm installed.
 
-# Installation
-Clone the repository: git clone https://github.com/your_username/FocusWin.git
+A local or remote MongoDB instance.
 
-# Install server dependencies:
+# Installation & Setup
+You will need to clone both the backend and frontend repositories into the same parent directory.
+
+# Clone the Backend Repository:
+git clone https://github.com/pavithra2870/FocusWin.git
+
+# Clone the Frontend Repository:
+git clone https://github.com/pavithra2870/FocusWin---Frontend.git
+
+# Install Backend Dependencies: 
+Navigate into the backend folder and install the necessary packages.
 cd FocusWin
-npm install
-Install client dependencies:
-cd client
-npm install
-Create a .env file in the root (server-side) directory and add your environment variables:
+npm install express express-session cors mongoose connect-mongo dotenv node-cron
+Configure Backend Environment: 
+While still in the FocusWin directory, create a .env file and add your environment variables.
 MONGO_URI='your_mongodb_connection_string'
 SESSION_SECRET='your_super_secret_key'
 PORT=5000
 
-# Running the Application
-Start the backend server (from the root directory):
-npm run dev
+# Install Frontend Dependencies: 
+Navigate into the frontend folder and install its packages.
+cd ../FocusWin---Frontend
+npm install react react-router dom react-calendar-heatmap axios recharts @splinetool/react-spline
 
-In a new terminal, start the frontend client (from the client directory):
+To install TailwindCSS, follow the official docs: https://tailwindcss.com/docs/installation/tailwind-cli
+I have used tailwind-cli
+
+# Running the Application
+You will need two separate terminals to run both the backend server and the frontend client simultaneously.
+
+Start the Backend Server:
+In your first terminal, navigate to the backend directory (FocusWin).
+Run the development server.
+cd path/to/FocusWin
+npm run dev
+The server should now be running on http://localhost:5000.
+
+Start the Frontend Client:
+In a new terminal, navigate to the frontend directory (FocusWin---Frontend).
+Start the React application.
+cd path/to/FocusWin---Frontend
 npm start
+The client should now be running on http://localhost:3000 and will connect to your backend.
