@@ -11,13 +11,18 @@ function Main() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [form, setForm] = useState({
+  const initialForm = {
     title: '',
     importance: 5,
     dueDate: '',
-    completed: false,
     group: '',
-  });
+    recurrence: {
+      type: 'none', // 'none' | 'daily' | 'weekly' | 'monthly'
+      days: [],     // for weekly
+      date: ''      // for monthly
+    }
+  };
+  const [form, setForm] = useState(initialForm);
   const [search, setSearch] = useState('');
   const [editingTask, setEditingTask] = useState(null);
   const [hoverRating, setHoverRating] = useState(0);
@@ -123,23 +128,29 @@ function Main() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-
+    const payload = {
+      ...form,
+      recurrence: {
+        type: form.recurrence.type,
+        days: form.recurrence.type === 'weekly' ? form.recurrence.days : undefined,
+        date: form.recurrence.type === 'monthly' ? form.recurrence.date : undefined
+      }
+    };
     if (editingTask) {
-      await updateTask(editingTask._id, { ...editingTask, ...form });
+      await updateTask(editingTask._id, payload);
     } else {
-      await createTask();
+      await createTask(payload);
     }
+    resetForm();
   };
 
-  const createTask = async () => {
-    await axios.post(`${API_BASE}/tasks`, form, { withCredentials: true });
-    resetForm();
+  const createTask = async (payload) => {
+    await axios.post(`${API_BASE}/tasks`, payload, { withCredentials: true });
     await fetchAll();
   };
 
   const updateTask = async (id, data) => {
     await axios.put(`${API_BASE}/tasks/${id}`, data, { withCredentials: true });
-    resetForm();
     await fetchAll();
   };
 
@@ -152,7 +163,7 @@ function Main() {
   
   const resetForm = () => {
     setEditingTask(null);
-    setForm({ title: '', importance: 5, dueDate: '', completed: false, group: '' });
+    setForm(initialForm);
   };
 
   const handleEdit = (task) => {
@@ -163,6 +174,7 @@ function Main() {
       dueDate: task.dueDate?.split('T')[0] || '',
       completed: task.completed,
       group: task.group || '',
+      recurrence: task.recurrence || { type: 'none', days: [], date: '' }
     });
   };
   
@@ -438,6 +450,61 @@ function Main() {
                     {groups.map((g) => <option key={g._id} value={g.name}>{g.name}</option>)}
                   </select>
                 </div>
+
+                <div className="option-group">
+                  <span className="option-label">Repeat:</span>
+                  <select
+                    className="group-select"
+                    value={form.recurrence.type}
+                    onChange={e => setForm({
+                      ...form,
+                      recurrence: { type: e.target.value, days: [], date: '' }
+                    })}
+                  >
+                    <option value="none">None</option>
+                    <option value="daily">Every day</option>
+                    <option value="weekly">Specific days</option>
+                    <option value="monthly">Every Nth of month</option>
+                  </select>
+                </div>
+                {form.recurrence.type === 'weekly' && (
+                  <div className="option-group">
+                    <span className="option-label">Days:</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d, i) => (
+                        <label key={i} style={{ color: form.recurrence.days.includes(i) ? 'var(--neon-green)' : 'var(--text-secondary)', fontWeight: 600 }}>
+                          <input
+                            type="checkbox"
+                            checked={form.recurrence.days.includes(i)}
+                            onChange={e => {
+                              const days = form.recurrence.days.includes(i)
+                                ? form.recurrence.days.filter(x => x !== i)
+                                : [...form.recurrence.days, i];
+                              setForm({ ...form, recurrence: { ...form.recurrence, days } });
+                            }}
+                            style={{ marginRight: 4 }}
+                          />
+                          {d}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {form.recurrence.type === 'monthly' && (
+                  <div className="option-group">
+                    <span className="option-label">Date:</span>
+                    <input
+                      className="date-input"
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={form.recurrence.date}
+                      onChange={e => setForm({ ...form, recurrence: { ...form.recurrence, date: e.target.value } })}
+                      placeholder="e.g. 6 for every 6th"
+                      style={{ width: 100 }}
+                    />
+                  </div>
+                )}
               </div>
             </form>
           </div>
