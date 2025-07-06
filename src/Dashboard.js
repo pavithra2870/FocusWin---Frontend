@@ -274,6 +274,36 @@ function Dashboard() {
     };
   };
 
+  // Helper: Get last N days with completion counts
+  const getTopNDays = (n, order = 'desc') => {
+    // Map: {dateString: count}
+    const dateMap = {};
+    tasks.forEach(task => {
+      if (task.completed && task.completedAt) {
+        const d = new Date(task.completedAt);
+        const dateStr = d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        dateMap[dateStr] = (dateMap[dateStr] || 0) + 1;
+      }
+    });
+    const arr = Object.entries(dateMap).map(([date, count]) => ({ date, count }));
+    arr.sort((a, b) => order === 'desc' ? b.count - a.count : a.count - b.count);
+    return arr.slice(0, n);
+  };
+
+  // Weekend vs Weekday
+  const getWeekendWeekdayStats = () => {
+    let weekday = 0, weekend = 0;
+    tasks.forEach(task => {
+      if (task.completed && task.completedAt) {
+        const d = new Date(task.completedAt);
+        const day = d.getDay();
+        if (day === 0 || day === 6) weekend++;
+        else weekday++;
+      }
+    });
+    return { weekday, weekend };
+  };
+
   // Prepare data for recharts
   const lineChartData = weeklyData.map(day => ({
     name: day.day,
@@ -286,6 +316,17 @@ function Dashboard() {
     { name: 'Overdue', value: stats.overdueTasks }
   ];
   const pieColors = [NEON_GREEN, NEON_PURPLE, NEON_RED];
+
+  // Most/least productive 7 days
+  const most7 = getTopNDays(7, 'desc').sort((a, b) => new Date(a.date) - new Date(b.date));
+  const least7 = getTopNDays(7, 'asc').sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  // Weekend vs Weekday
+  const weekendWeekday = getWeekendWeekdayStats();
+  const weekendWeekdayPie = [
+    { name: 'Weekdays', value: weekendWeekday.weekday },
+    { name: 'Weekends', value: weekendWeekday.weekend }
+  ];
 
   // Prepare data for calendar heatmap
   const heatmapData = tasks.filter(t => t.completed && t.completedAt).map(t => {
@@ -447,6 +488,50 @@ function Dashboard() {
                 <Bar dataKey="tasks" fill={NEON_ORANGE} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          <div className="chart-container">
+            <h3 className="chart-title">Most Productive 7 Days</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={most7} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={NEON_BG} />
+                <XAxis dataKey="date" stroke={NEON_GREEN} />
+                <YAxis allowDecimals={false} stroke={NEON_GREEN} />
+                <Tooltip contentStyle={{ background: NEON_BG, border: `1px solid ${NEON_GREEN}` }} labelStyle={{ color: NEON_GREEN }} />
+                <Bar dataKey="count" fill={NEON_GREEN} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="chart-container">
+            <h3 className="chart-title">Least Productive 7 Days</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={least7} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={NEON_BG} />
+                <XAxis dataKey="date" stroke={NEON_GREEN} />
+                <YAxis allowDecimals={false} stroke={NEON_GREEN} />
+                <Tooltip contentStyle={{ background: NEON_BG, border: `1px solid ${NEON_GREEN}` }} labelStyle={{ color: NEON_GREEN }} />
+                <Bar dataKey="count" fill={NEON_PURPLE} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="chart-container">
+            <h3 className="chart-title">Weekend vs Weekday Productivity</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={weekendWeekdayPie} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label>
+                  <Cell fill={NEON_GREEN} />
+                  <Cell fill={NEON_PURPLE} />
+                </Pie>
+                <Legend />
+                <Tooltip contentStyle={{ background: NEON_BG, border: `1px solid ${NEON_GREEN}` }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div style={{ textAlign: 'center', color: 'var(--text-primary)', marginTop: 8, fontWeight: 600 }}>
+              {weekendWeekday.weekday > weekendWeekday.weekend
+                ? 'You are more productive on weekdays!'
+                : weekendWeekday.weekend > weekendWeekday.weekday
+                  ? 'You are more productive on weekends!'
+                  : 'Your productivity is balanced across the week.'}
+            </div>
           </div>
         </div>
 
