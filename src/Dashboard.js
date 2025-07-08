@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParamsduled for completion in the next 7 days, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import './App.css';
@@ -31,7 +31,7 @@ function Dashboard() {
   });
   const [weeklyData, setWeeklyData] = useState([]);
   const [priorityData, setPriorityData] = useState([]);
-  const [pendingByImportance, setPendingByImportance] = useState([]); // New state for pending tasks by importance
+  const [pendingByImportance, setPendingByImportance] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,15 +46,14 @@ function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/tasks`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/tasks`); // Removed withCredentials
       const tasksData = response.data;
       setTasks(tasksData);
       
-      // Calculate statistics
       calculateStats(tasksData);
       calculateWeeklyData(tasksData);
       calculatePriorityData(tasksData);
-      calculatePendingByImportance(tasksData); // New calculation
+      calculatePendingByImportance(tasksData);
       
       setLoading(false);
     } catch (error) {
@@ -86,7 +85,6 @@ function Dashboard() {
       return completedDate >= today;
     }).length;
 
-    // Calculate current streak
     const currentStreak = calculateStreak(tasksData);
 
     setStats({
@@ -112,7 +110,7 @@ function Dashboard() {
     let streak = 0;
     let currentDate = new Date(today);
 
-    for (let i = 0; i < 30; i++) { // Check last 30 days
+    for (let i = 0; i < 30; i++) {
       const dayTasks = sortedTasks.filter(task => {
         const taskDate = new Date(task.completedAt);
         taskDate.setHours(0, 0, 0, 0);
@@ -176,23 +174,19 @@ function Dashboard() {
 
   const calculatePendingByImportance = (tasksData) => {
     const pendingCounts = {};
-    // Filter for pending tasks (not completed)
     const pendingTasks = tasksData.filter(task => !task.completed);
     
-    // Initialize counts for all importance levels (1-10)
     for (let i = 1; i <= 10; i++) {
       pendingCounts[i] = 0;
     }
     
-    // Count pending tasks by importance
     pendingTasks.forEach(task => {
-      const priority = task.importance || 0; // Default to 0 if undefined
+      const priority = task.importance || 0;
       if (priority >= 1 && priority <= 10) {
         pendingCounts[priority] = (pendingCounts[priority] || 0) + 1;
       }
     });
     
-    // Convert to array for recharts
     const pendingData = Object.entries(pendingCounts).map(([priority, count]) => ({
       importance: parseInt(priority),
       tasks: count
@@ -213,12 +207,10 @@ function Dashboard() {
     return 'var(--danger-red)';
   };
 
-  // Helper to format date in IST, DD/MM/YYYY, 24-hour
   const formatISTDateTime = (dateString) => {
     if (!dateString) return '—';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '—';
-    // Convert to IST (UTC+5:30)
     const istOffset = 5.5 * 60 * 60 * 1000;
     const istDate = new Date(date.getTime() + istOffset);
     const day = String(istDate.getUTCDate()).padStart(2, '0');
@@ -226,15 +218,13 @@ function Dashboard() {
     const year = istDate.getUTCFullYear();
     const hours = String(istDate.getUTCHours()).padStart(2, '0');
     const minutes = String(istDate.getUTCMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    return `${day}/${month}/${year} ${hours}:${minutes}`; // Completed format
   };
 
-  // Helper: Get day of week in Indian English
   const getDayName = (date) => {
     return date.toLocaleDateString('en-IN', { weekday: 'long' });
   };
 
-  // Helper: Get productivity insights for last 7 days
   const getProductivityInsights = () => {
     if (!tasks.length) return null;
     const now = new Date();
@@ -245,7 +235,6 @@ function Dashboard() {
     const recentTasks = tasks.filter(task => task.completed && task.completedAt && new Date(task.completedAt) >= sevenDaysAgo);
     if (!recentTasks.length) return null;
 
-    // Count completions by day of week in the last 7 days
     const dayCounts = Array(7).fill(0);
     recentTasks.forEach(task => {
       const d = new Date(task.completedAt);
@@ -256,7 +245,6 @@ function Dashboard() {
     const mostProductiveDayIdx = dayCounts.indexOf(maxCount);
     const leastProductiveDayIdx = dayCounts.indexOf(minCount);
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    // Weekday vs weekend in the last 7 days
     const weekdaySum = dayCounts.slice(1, 6).reduce((a, b) => a + b, 0);
     const weekendSum = dayCounts[0] + dayCounts[6];
     let trendMsg = '';
@@ -274,14 +262,12 @@ function Dashboard() {
     };
   };
 
-  // Helper: Get last N days with completion counts
   const getTopNDays = (n, order = 'desc') => {
-    // Map: {dateString: count}
     const dateMap = {};
     tasks.forEach(task => {
       if (task.completed && task.completedAt) {
         const d = new Date(task.completedAt);
-        const dateStr = d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        const dateStr = d.toLocaleDateString('en-CA');
         dateMap[dateStr] = (dateMap[dateStr] || 0) + 1;
       }
     });
@@ -290,7 +276,6 @@ function Dashboard() {
     return arr.slice(0, n);
   };
 
-  // Weekend vs Weekday
   const getWeekendWeekdayStats = () => {
     let weekday = 0, weekend = 0;
     tasks.forEach(task => {
@@ -304,7 +289,6 @@ function Dashboard() {
     return { weekday, weekend };
   };
 
-  // Prepare data for recharts
   const lineChartData = weeklyData.map(day => ({
     name: day.day,
     Completed: day.completed
@@ -317,29 +301,24 @@ function Dashboard() {
   ];
   const pieColors = [NEON_GREEN, NEON_PURPLE, NEON_RED];
 
-  // Most/least productive 7 days
   const most7 = getTopNDays(7, 'desc').sort((a, b) => new Date(a.date) - new Date(b.date));
   const least7 = getTopNDays(7, 'asc').sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Weekend vs Weekday
   const weekendWeekday = getWeekendWeekdayStats();
   const weekendWeekdayPie = [
     { name: 'Weekdays', value: weekendWeekday.weekday },
     { name: 'Weekends', value: weekendWeekday.weekend }
   ];
 
-  // Prepare data for calendar heatmap
   const heatmapData = tasks.filter(t => t.completed && t.completedAt).map(t => {
     const d = new Date(t.completedAt);
     return { date: d.toISOString().slice(0, 10), count: 1 };
   });
-  // Aggregate by date
   const dateMap = {};
   heatmapData.forEach(item => {
     dateMap[item.date] = (dateMap[item.date] || 0) + 1;
   });
   const calendarData = Object.entries(dateMap).map(([date, count]) => ({ date, count }));
-  // For calendar range
   const today = new Date();
   const startDate = new Date(today);
   startDate.setDate(today.getDate() - 180);
@@ -356,13 +335,11 @@ function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
-        {/* Header */}
         <div className="dashboard-header">
           <h1 className="dashboard-title">Welcome back, {user?.name}!</h1>
           <p className="dashboard-subtitle">Here's your productivity overview</p>
         </div>
 
-        {/* Insights Section */}
         <div className="insights-section" style={{ marginBottom: 32 }}>
           <h3 className="section-title">Insights</h3>
           <div style={{ color: 'var(--text-primary)', fontSize: '1.1rem', textAlign: 'center' }}>
@@ -380,7 +357,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon">📊</div>
@@ -449,7 +425,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Charts Section */}
         <div className="charts-section">
           <div className="chart-container">
             <h3 className="chart-title">Weekly Productivity (Tasks Completed)</h3>
@@ -528,14 +503,13 @@ function Dashboard() {
             <div style={{ textAlign: 'center', color: 'var(--text-primary)', marginTop: 8, fontWeight: 600 }}>
               {weekendWeekday.weekday > weekendWeekday.weekend
                 ? 'You are more productive on weekdays!'
-                : weekendWeekday.weekend > weekendWeekday.weekday
+                : weekendWeekday.weekend > weekday
                   ? 'You are more productive on weekends!'
                   : 'Your productivity is balanced across the week.'}
             </div>
           </div>
         </div>
 
-        {/* Streak Calendar Section */}
         <div className="calendar-section" style={{ background: 'var(--card-bg)', borderRadius: 16, padding: 24, marginBottom: 40, border: '1px solid var(--card-border)' }}>
           <h3 className="section-title">Streak Tracker</h3>
           <div style={{ width: '100%', maxWidth: '600px', height: '150px' }}>
@@ -565,7 +539,6 @@ function Dashboard() {
           `}</style>
         </div>
 
-        {/* Recent Activity */}
         <div className="recent-activity">
           <h3 className="section-title">Recent Activity</h3>
           <div className="activity-list">
@@ -590,7 +563,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="quick-actions">
           <h3 className="section-title">Quick Actions</h3>
           <div className="actions-grid">
