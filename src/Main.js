@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = import.meta.env.VITE_API_URL ?? 'https://focuswin.onrender.com';
 
 function Main() {
   const { username } = useParams();
