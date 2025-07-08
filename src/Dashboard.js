@@ -7,7 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = process.env.REACT_APP_API_URL;
 const NEON_GREEN = '#00ff88';
 const NEON_PURPLE = '#8b5cf6';
 const NEON_RED = '#ef4444';
