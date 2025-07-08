@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const checkUserStatus = async () => {
       try {
         console.log('Checking user status...');
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch('https://focuswin.onrender.com/api/auth/me', {
           credentials: 'include', // This is correct
         });
 
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     // This is correct
-    await fetch('http://localhost:5000/api/auth/logout', {
+    await fetch('https://focuswin.onrender.com/api/auth/logout', {
       method: 'POST',
       credentials: 'include',
     });
