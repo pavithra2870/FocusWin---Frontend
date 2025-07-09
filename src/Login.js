@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ function Login() {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ username, password })
     });
 
     const data = await res.json();
@@ -29,7 +29,7 @@ function Login() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+      <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
       <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" type="password" />
       <button type="submit">Login</button>
       {error && <div>{error}</div>}
