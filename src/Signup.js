@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 
 function Signup() {
   const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -22,7 +22,7 @@ function Signup() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, username, password })
+        body: JSON.stringify({ name, email, password })
       });
 
       const data = await res.json();
@@ -62,12 +62,13 @@ function Signup() {
           </div>
 
           <div className="auth-input-group">
-            <span className="auth-input-icon">🆔</span>
+            <span className="auth-input-icon">📧</span>
             <input
               className="auth-input"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
