@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 
 function Signup() {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -19,10 +19,10 @@ function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch('https://focuswin.onrender.com/api/auth/signup', {
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ name, username, password })
       });
 
       const data = await res.json();
@@ -62,13 +62,12 @@ function Signup() {
           </div>
 
           <div className="auth-input-group">
-            <span className="auth-input-icon">📧</span>
+            <span className="auth-input-icon">🆔</span>
             <input
               className="auth-input"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
